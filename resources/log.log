@@ -1,0 +1,7 @@
+20211102T00:00 - APP - SUCCESS: No problem here.
+20211102T00:01 - APP - INFO: Some info here.
+20211102T00:02 - APP - ERROR [1]: None-severe error.
+20211102T00:02 - APP - ERROR [5]: Severe error.
+20211102T00:02 - APP - ERROR [5]: Severe error.
+20211129T00:02 - APP2 - ERROR [3]: Severe error.
+20211130T00:00 - APP - SUCCESS: OK.
