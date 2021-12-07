@@ -1,55 +1,76 @@
-log_data_a = {"timestamp": "20211102T00:00", "application": "app", "category": "SUCESS", "message": "No problem here"}
-log_data_b = {"timestamp": "20211102T00:01", "application": "app", "category": "SUCESS", "message": "No problem here"}
-log_data_c = {"timestamp": "20211102T00:02", "application": "app", "category": "SUCESS", "message": "No problem here"}
-log_data_d = {"timestamp": "20211130T00:00", "application": "app", "category": "SUCESS",
-              "message": "No problem here"}  # JSON
+import pydantic
+from fastapi import FastAPI
+from fastapi.params import Query
+from starlette import status
 
-data = []
-data.append(log_data_a)
-data.append(log_data_b)
-data.append(log_data_c)
-# print(data)
-data[0]
+from utils import statics_log, filter_log
 
-status = ("SUCCESS", "ERROR", "INFO")
-
-# 1
-# PEP-8
-MAX_NUM = 100
+app = FastAPI(
+    title="Workshop API",
+    version="1.0.0",
+    description="Api doc",
+    docs_url="/docs"
+)
 
 
-def statics_log(file_path: str) -> dict:
+@app.get("/")
+def read_root():
+    print("revisiones")
+    return {"Hello": "World"}
+
+
+# SCHEMA
+class ResponseDto(pydantic.BaseModel):
+    category: str
+    severity: int
+
+
+responses_log = {
+    # status.HTTP_404_NOT_FOUND, {"model": HTTPException},
+    # status.HTTP_200_OK, {"model": ResponseDto}
+}
+
+
+@app.get("/logs/summary", status_code=status.HTTP_200_OK, description="Resumen total mensaje de logs.")
+def get_summary_log():
     """
-    # statics_log is a function ...
-    Response
-        ErrorCount : Cantidad de mensajes de error.
-        SuccessCount : Cantidad de mensajes de éxito (successful).
-        Total : Número total de mensajes.
-
-    :param file_path:
+    # Operacion que filtra logs
     :return:
     """
-    response: dict = {}
-    with open(file_path) as file_reader:
-        reader = file_reader.read()
-        parameters = reader.split("\n")
-        count_messages = len(parameters)
-        count_error, count_success = 0, 0
-        response["Total"] = count_messages
+    result = statics_log(file_path="resources/log.log")
+    return result
 
-        data_comp = [item if "ERROR" in item else None for item in parameters]
-        # print(data_comp)
-        for item in parameters:
-            if "ERROR" in item:
-                count_error += 1
-            if "SUCCESS" in item:
-                count_success += 1
 
-        response["ErrorCount"] = count_error
-        response["SuccessCount"] = count_success
+from pydantic import BaseModel
+
+
+class RequestDto(BaseModel):
+    name: str
+    description: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Roberto",
+                "description": "Team Python"
+            }
+        }
+
+
+class ResponseBDto(BaseModel):
+    message: str
+
+
+@app.get("/logs/{type}")
+def get_filter_log(type: str, category: str = Query(..., description="Filtro por categoria")):
+    """
+
+    :return:
+    """
+    response = filter_log(path="resources/log.log", request={"category": category})
     return response
 
 
-FILE_PATH = "resources/log.log"
-data = statics_log(file_path=FILE_PATH)
-print(data)
+@app.post("/demo", status_code=status.HTTP_201_CREATED, response_model=ResponseBDto)
+def test_post(request_in: RequestDto):
+    return ResponseBDto(message=f"Este es un mensaje {request_in.name}")

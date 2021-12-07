@@ -1,18 +1,22 @@
 import unittest
-from src.app import statics_log
+from src.utils import statics_log
 
 
-class TestApp(unittest.TestCase):
+class TestDemoApp(unittest.TestCase):
 
-    def test_some_function(self):
-        # given
+    def setUp(self) -> None:
+        self.base_path = "resources/test-log.log"
 
-        # when
-        statics_log()
+    def tearDown(self) -> None:
+        pass
 
-        # assert
-        self.assertTrue()
-        self.assertEqual()
+    def test_given_valid_input_when_statics_log_then_ok(self):
+        # GIVEN
+
+        # WHEN
+        result = statics_log(file_path=self.base_path)
+        # THEN
+        self.assertEqual(result.get("ErrorCount"), 3)
 
 
 if __name__ == '__main__':
